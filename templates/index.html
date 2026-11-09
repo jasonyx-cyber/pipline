@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0E1420">
+  <meta name="description" content="A private, focused job application tracker.">
+  <title>Pipeline — Job Application Tracker</title>
+  <link rel="stylesheet" href="/static/style.css?v=2">
+  <script src="/static/app.js?v=3" defer></script>
+</head>
+<body>
+  <main id="authView" class="auth-view">
+    <section class="auth-card" aria-labelledby="authTitle">
+      <a class="brand" href="/" aria-label="Pipeline home">Pipeline<span class="brand-dot">.</span></a>
+      <h1 id="authTitle">Your next move, in view.</h1>
+      <p class="sub" id="authDescription">Keep every application organized and private.</p>
+
+      <div class="auth-tabs" role="tablist" aria-label="Account access">
+        <button class="auth-tab active" id="loginTab" type="button" role="tab" aria-selected="true">Sign in</button>
+        <button class="auth-tab" id="signupTab" type="button" role="tab" aria-selected="false">Create account</button>
+      </div>
+      <form id="authForm" method="post" action="/">
+        <label id="emailLabel" for="authEmail">Email address
+          <input id="authEmail" name="email" type="email" autocomplete="email" maxlength="254" required>
+        </label>
+        <label id="passwordLabel" for="authPassword">Password (at least 12 characters)
+          <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required>
+        </label>
+        <label id="confirmPasswordLabel" for="confirmPassword" hidden>Confirm password
+          <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128">
+        </label>
+        <button id="authSubmit" type="submit">Sign in</button>
+        <button id="forgotPassword" class="text-button" type="button">Forgot your password?</button>
+        <button id="resendVerification" class="text-button" type="button" hidden>Resend verification email</button>
+      </form>
+
+      <button id="backToSignIn" class="text-button" type="button" hidden>Back to sign in</button>
+
+      <form id="recoveryForm" method="post" action="/" hidden>
+        <label for="newPassword">New password
+          <input id="newPassword" name="newPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+        </label>
+        <label for="confirmNewPassword">Confirm new password
+          <input id="confirmNewPassword" name="confirmNewPassword" type="password" autocomplete="new-password" minlength="12" maxlength="128" required>
+        </label>
+        <button id="savePassword" type="submit">Set new password</button>
+      </form>
+      <p class="auth-hint" id="authHint" role="status" aria-live="polite"></p>
+      <p class="auth-footnote">Private by design. Your applications are visible only to you.</p>
+    </section>
+  </main>
+
+  <div class="app" id="appView" hidden>
+    <aside class="rail">
+      <a class="brand" href="/" aria-label="Pipeline home">Pipeline<span class="brand-dot">.</span></a>
+      <nav aria-label="Main navigation">
+        <button class="navbtn active" id="boardNav" type="button" aria-current="page">Applications</button>
+        <button class="navbtn" id="overviewNav" type="button">Overview</button>
+      </nav>
+      <button class="addbtn" id="addApplication" type="button">+ Add application</button>
+      <div class="account">
+        <span class="account-label">SIGNED IN AS</span>
+        <span class="account-email" id="accountEmail"></span>
+        <button class="signout ghost" id="signOut" type="button">Sign out</button>
+      </div>
+    </aside>
+
+    <main>
+      <section id="boardView" aria-labelledby="pageTitle">
+        <header class="funnel">
+          <div class="funnel-head">
+            <h1 id="pageTitle">Your pipeline</h1>
+            <p class="sub">A clear view of every opportunity you’re pursuing.</p>
+          </div>
+          <div class="funnel-bars" aria-label="Applications by status">
+            <div class="fbar" data-k="Applied"><span class="label">Applied</span><div class="statnum" id="countApplied">0</div><div class="fill"></div></div>
+            <div class="fbar" data-k="Interview"><span class="label">Interview</span><div class="statnum" id="countInterview">0</div><div class="fill"></div></div>
+            <div class="fbar" data-k="Offer"><span class="label">Offer</span><div class="statnum" id="countOffer">0</div><div class="fill"></div></div>
+            <div class="fbar" data-k="Rejected"><span class="label">Rejected</span><div class="statnum" id="countRejected">0</div><div class="fill"></div></div>
+          </div>
+        </header>
+        <div class="board-tools">
+          <label class="search-label" for="searchApplications">Search
+            <input id="searchApplications" type="search" maxlength="160" placeholder="Company, role, or notes">
+          </label>
+          <label for="filterStatus">Status
+            <select id="filterStatus">
+              <option value="">All statuses</option>
+              <option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option>
+            </select>
+          </label>
+          <button class="ghost export-btn" id="exportApplications" type="button">Export CSV</button>
+        </div>
+        <div class="board" id="board" aria-label="Job application board"></div>
+      </section>
+
+      <section class="overview-view" id="overviewView" aria-labelledby="overviewTitle" hidden>
+        <header class="funnel-head">
+          <h1 id="overviewTitle">Overview</h1>
+          <p class="sub">Your search at a glance.</p>
+        </header>
+        <div class="overview-stats">
+          <div class="overview-stat"><span>Total applications</span><strong id="overviewTotal">0</strong></div>
+          <div class="overview-stat"><span>Response rate</span><strong id="overviewResponse">0%</strong></div>
+          <div class="overview-stat"><span>Follow-ups due</span><strong id="overviewStale">0</strong></div>
+        </div>
+        <section class="recent-section">
+          <h2>Recently updated</h2>
+          <div class="recent-list" id="recentApplications"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="applicationBackdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="applicationModalTitle">
+      <h2 id="applicationModalTitle">Add application</h2>
+      <form id="applicationForm" method="post" action="/">
+        <label for="company">Company
+          <input id="company" name="company" maxlength="160" required autocomplete="organization">
+        </label>
+        <label for="role">Role
+          <input id="role" name="role" maxlength="160" required>
+        </label>
+        <label for="applicationLink">Job link
+          <input id="applicationLink" name="link" type="url" maxlength="2048" placeholder="https://">
+        </label>
+        <label for="applicationStatus">Status
+          <select id="applicationStatus" name="status">
+            <option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option>
+          </select>
+        </label>
+        <label for="notes">Notes
+          <textarea id="notes" name="notes" rows="4" maxlength="10000" placeholder="Interview details, follow-up reminders…"></textarea>
+        </label>
+        <div class="history-panel" id="historyPanel" hidden>
+          <h3>Status history</h3>
+          <ol id="applicationHistory"></ol>
+        </div>
+        <div class="modal-actions">
+          <button class="ghost" id="cancelApplication" type="button">Cancel</button>
+          <button type="submit" id="saveApplication">Save application</button>
+        </div>
+      </form>
+    </section>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
